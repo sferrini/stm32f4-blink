@@ -1,24 +1,74 @@
 /*
- * This is an stm32f4 template program
+ * This is a blink example using the stm32f4-template (https://github.com/sferrini/stm32f4-template)
  */
 
-/* stm32f4_discovery.h is located in Utilities/STM32F4-Discovery
- * and defines the GPIO Pins where the leds are connected.
- * Including this header also includes stm32f4xx.h and
- * stm32f4xx_conf.h, which includes stm32f4xx_gpio.h
- */
 #include "stm32f4_discovery.h"
 
-/* Main function, the entry point of this program.
- * The main function is called from the startup code in file
- * Libraries/CMSIS/ST/STM32F4xx/Source/Templates/TrueSTUDIO/startup_stm32f4xx.s
- * (line 101)
- */
+#define LEDS_GPIO_PORT (GPIOD)
+
+#define GREEN  LED4_PIN
+#define ORANGE LED3_PIN
+#define RED    LED5_PIN
+#define BLUE   LED6_PIN
+#define ALL_LEDS (GREEN | ORANGE | RED | BLUE) // all leds
+
+static uint16_t leds[LEDn] = {GREEN, ORANGE, RED, BLUE};
+
+#define PAUSE_LONG  4000000L
+#define PAUSE_SHORT 1000000L
+
+
+static void delay(__IO uint32_t nCount)
+{
+    while(nCount--)
+        __asm("nop"); // do nothing
+}
+
+static void leds_setup(void)
+{
+    GPIO_InitTypeDef GPIO_InitStructure;
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
+    GPIO_InitStructure.GPIO_Pin   = ALL_LEDS;
+    GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_OUT;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_NOPULL;
+    GPIO_Init(LEDS_GPIO_PORT, &GPIO_InitStructure);
+}
+
+static void leds_round(void)
+{
+    int i;
+
+    for (i = 0; i < LEDn; i++)
+    {
+        GPIO_SetBits(LEDS_GPIO_PORT, leds[i]);
+        delay(PAUSE_LONG);
+        GPIO_ResetBits(LEDS_GPIO_PORT, ALL_LEDS);
+    }
+}
+
+static void leds_flash_all(void)
+{
+    int i;
+
+    for (i = 0; i < LEDn; i++)
+    {
+        GPIO_SetBits(LEDS_GPIO_PORT, ALL_LEDS);
+        delay(PAUSE_SHORT);
+        GPIO_ResetBits(LEDS_GPIO_PORT, ALL_LEDS);
+        delay(PAUSE_SHORT);
+    }
+}
+
 int main(void)
 {
+    leds_setup();
+
     while (1)
     {
-    	__asm("nop");
+        leds_round();
+        leds_flash_all();
     }
 
     return 0; // never returns actually

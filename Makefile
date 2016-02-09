@@ -99,6 +99,8 @@ SRCS   = main.c
 # our project. This file is in the current directory and
 # was writen by ST.
 SRCS  += system_stm32f4xx.c
+SRCS  += stm32f4xx_gpio.c
+SRCS  += stm32f4xx_rcc.c
 
 # Startup file written by ST
 # The assembly code in this file is the first one to be
